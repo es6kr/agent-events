@@ -20,16 +20,20 @@ describe("@es6kr/agent-events Shell Adapters Test Suite", () => {
   });
 
   test("executes Claude Code shell adapter scripts cleanly", () => {
-    const env = {
-      ...process.env,
-      CLAUDE_SESSION_ID: sessionId,
-      CLAUDE_TOOL_NAME: "Write"
-    };
+    // Real Claude Code hooks pass session_id/tool_name via a JSON payload on
+    // stdin (or CLAUDE_TOOL_INPUT env var) — not CLAUDE_SESSION_ID/CLAUDE_TOOL_NAME
+    // env vars, which Claude Code never sets.
+    const env = { ...process.env };
+    delete env.CLAUDE_TOOL_INPUT;
 
-    execSync(`bash ${path.join(claudeAdaptersDir, "session-start.sh")}`, { env });
-    execSync(`bash ${path.join(claudeAdaptersDir, "pre-tool.sh")}`, { env });
-    execSync(`bash ${path.join(claudeAdaptersDir, "post-tool.sh")}`, { env });
-    execSync(`bash ${path.join(claudeAdaptersDir, "stop.sh")}`, { env });
+    const sessionStartInput = JSON.stringify({ session_id: sessionId, cwd: "/tmp" });
+    const toolInput = JSON.stringify({ session_id: sessionId, tool_name: "Write" });
+    const stopInput = JSON.stringify({ session_id: sessionId, transcript_path: "/tmp/t.jsonl" });
+
+    execSync(`bash ${path.join(claudeAdaptersDir, "session-start.sh")}`, { env, input: sessionStartInput });
+    execSync(`bash ${path.join(claudeAdaptersDir, "pre-tool.sh")}`, { env, input: toolInput });
+    execSync(`bash ${path.join(claudeAdaptersDir, "post-tool.sh")}`, { env, input: toolInput });
+    execSync(`bash ${path.join(claudeAdaptersDir, "stop.sh")}`, { env, input: stopInput });
 
     expect(fs.existsSync(targetFile)).toBe(true);
 

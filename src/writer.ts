@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
 import { UnifiedEvent, validateUnifiedEvent } from "./schema";
+import { redactEventData } from "./redact";
 
 export interface EventWriterOptions {
   logDir?: string;
@@ -41,10 +42,16 @@ export class UnifiedEventWriter {
   }
 
   /**
-   * Emit a single UnifiedEvent to the session NDJSON file
+   * Emit a single UnifiedEvent to the session NDJSON file.
+   *
+   * Any `data.text` string is always redacted to a hash/length pair before
+   * being written to disk — this is independent of `share_eligibility`,
+   * which governs whether the event may be *shared*, not whether raw text
+   * is safe to persist in a world-readable file in the first place.
    */
   public emit(event: UnifiedEvent): string {
-    const validatedEvent = this.autoValidate ? validateUnifiedEvent(event) : event;
+    const redactedEvent: UnifiedEvent = { ...event, data: redactEventData(event.data) };
+    const validatedEvent = this.autoValidate ? validateUnifiedEvent(redactedEvent) : redactedEvent;
     const line = JSON.stringify(validatedEvent) + "\n";
     const targetFile = this.getLogFilePath(validatedEvent.sessionId);
 
