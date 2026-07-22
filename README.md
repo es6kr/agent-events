@@ -58,4 +58,5 @@ npm test         # Run Jest unit test suite
 - `antigravity`: Gemini pair-programming subagents and background tasks
 - `openclaw`: OpenClaw headless CLI sessions (`acpx`)
 - `claw-orchestrator`: Enderfga/openclaw-claude-code orchestrator stdio ACP streams
-- `opencode`: OpenCode plugin SDK events
+
+`opencode` was previously declared here without an adapter ever being built. Removed until an adapter actually exists — add it back alongside the adapter, not before.
