@@ -1,14 +1,20 @@
 #!/usr/bin/env bash
 # Claude Code Stop adapter hook emitting UnifiedEvent session.end
+# Input (stdin): JSON { session_id, transcript_path, stop_hook_active }
+# Always allows (exit 0) — this hook only logs, never blocks Stop.
 set -euo pipefail
 
-SESSION_ID="${CLAUDE_SESSION_ID:-default-session}"
+INPUT="${CLAUDE_TOOL_INPUT:-$(cat)}"
+SESSION_ID=$(printf '%s' "$INPUT" | jq -r '.session_id // "default-session"' 2>/dev/null)
+
 LOG_DIR="${HOME}/.claude/state/agent-events"
 mkdir -p "$LOG_DIR"
 TARGET_FILE="${LOG_DIR}/${SESSION_ID}.ndjson"
 
 TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-cat <<EOF >> "$TARGET_FILE"
-{"v":1,"ts":"$TS","tool":"claude-code","sessionId":"$SESSION_ID","event":"session.end","share_eligibility":"public","data":{"reason":"stop"}}
-EOF
+jq -nc --arg ts "$TS" --arg sid "$SESSION_ID" \
+  '{v:1, ts:$ts, tool:"claude-code", sessionId:$sid, event:"session.end", share_eligibility:"public", data:{reason:"stop"}}' \
+  >> "$TARGET_FILE"
+
+exit 0

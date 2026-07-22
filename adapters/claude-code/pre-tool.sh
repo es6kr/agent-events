@@ -1,15 +1,18 @@
 #!/usr/bin/env bash
 # Claude Code PreToolUse adapter hook emitting UnifiedEvent tool.before
+# Input (stdin): JSON { session_id, tool_name, tool_input, ... }
 set -euo pipefail
 
-SESSION_ID="${CLAUDE_SESSION_ID:-default-session}"
+INPUT="${CLAUDE_TOOL_INPUT:-$(cat)}"
+SESSION_ID=$(printf '%s' "$INPUT" | jq -r '.session_id // "default-session"' 2>/dev/null)
+TOOL_NAME=$(printf '%s' "$INPUT" | jq -r '.tool_name // "unknown"' 2>/dev/null)
+
 LOG_DIR="${HOME}/.claude/state/agent-events"
 mkdir -p "$LOG_DIR"
 TARGET_FILE="${LOG_DIR}/${SESSION_ID}.ndjson"
 
 TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-TOOL_NAME="${CLAUDE_TOOL_NAME:-unknown}"
 
-cat <<EOF >> "$TARGET_FILE"
-{"v":1,"ts":"$TS","tool":"claude-code","sessionId":"$SESSION_ID","event":"tool.before","share_eligibility":"public","data":{"toolName":"$TOOL_NAME"}}
-EOF
+jq -nc --arg ts "$TS" --arg sid "$SESSION_ID" --arg tool "$TOOL_NAME" \
+  '{v:1, ts:$ts, tool:"claude-code", sessionId:$sid, event:"tool.before", share_eligibility:"public", data:{toolName:$tool}}' \
+  >> "$TARGET_FILE"
