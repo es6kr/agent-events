@@ -29,7 +29,7 @@ describe("@es6kr/agent-events Multi-Runtime E2E Integration", () => {
       sessionId,
       event: "session.start",
       share_eligibility: "public",
-      data: { cwd: "/Users/david/works/app" }
+      data: { cwd: "/Users/dev/works/app" }
     });
 
     // 2. Emulate Antigravity subagent spawn
