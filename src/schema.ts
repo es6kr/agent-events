@@ -7,8 +7,7 @@ export const AgentToolEnum = z.enum([
   "claude-code",
   "antigravity",
   "openclaw",
-  "claw-orchestrator",
-  "orca"
+  "claw-orchestrator"
 ]);
 export type AgentTool = z.infer<typeof AgentToolEnum>;
 

@@ -58,7 +58,6 @@ npm test         # Run Jest unit test suite
 - `antigravity`: Gemini pair-programming subagents and background tasks
 - `openclaw`: OpenClaw headless CLI sessions (`acpx`)
 - `claw-orchestrator`: Enderfga/openclaw-claude-code orchestrator stdio ACP streams
-- `orca`: Stably AI Orca (Agent Development Environment) parallel CLI agent streams
 
 ## Architecture & Governance
 
