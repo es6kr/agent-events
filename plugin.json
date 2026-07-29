@@ -1,0 +1,4 @@
+{
+  "name": "agent-events",
+  "description": "Emit unified agent lifecycle events (tool before/after, session end) as NDJSON via @es6kr/agent-events adapters."
+}

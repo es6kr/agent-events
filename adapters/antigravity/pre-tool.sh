@@ -1,15 +1,21 @@
 #!/usr/bin/env bash
 # Antigravity PreToolUse adapter hook emitting UnifiedEvent tool.before
+# Input (stdin): JSON { conversationId, toolCall: { name, ... }, ... }
+# Output (stdout): JSON { decision } — must always allow, this hook only logs
 set -euo pipefail
 
-SESSION_ID="${ANTIGRAVITY_CONVERSATION_ID:-antigravity-session}"
+INPUT="$(cat)"
+SESSION_ID=$(printf '%s' "$INPUT" | jq -r '.conversationId // "antigravity-session"' 2>/dev/null)
+TOOL_NAME=$(printf '%s' "$INPUT" | jq -r '.toolCall.name // "unknown"' 2>/dev/null)
+
 LOG_DIR="${HOME}/.claude/state/agent-events"
 mkdir -p "$LOG_DIR"
 TARGET_FILE="${LOG_DIR}/${SESSION_ID}.ndjson"
 
 TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-TOOL_NAME="${ANTIGRAVITY_TOOL_NAME:-unknown}"
 
-cat <<EOF >> "$TARGET_FILE"
-{"v":1,"ts":"$TS","tool":"antigravity","sessionId":"$SESSION_ID","event":"tool.before","share_eligibility":"public","data":{"toolName":"$TOOL_NAME"}}
-EOF
+jq -nc --arg ts "$TS" --arg sid "$SESSION_ID" --arg tool "$TOOL_NAME" \
+  '{v:1, ts:$ts, tool:"antigravity", sessionId:$sid, event:"tool.before", share_eligibility:"public", data:{toolName:$tool}}' \
+  >> "$TARGET_FILE"
+
+echo '{"decision":"allow"}'

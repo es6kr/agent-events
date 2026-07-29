@@ -49,24 +49,32 @@ describe("@es6kr/agent-events Shell Adapters Test Suite", () => {
   });
 
   test("executes Antigravity shell adapter scripts cleanly", () => {
-    const env = {
-      ...process.env,
-      ANTIGRAVITY_CONVERSATION_ID: sessionId,
-      ANTIGRAVITY_TOOL_NAME: "run_command"
-    };
+    // Real Antigravity hooks pass conversationId/toolCall.name via a JSON
+    // payload on stdin (per https://antigravity.google/docs/hooks) — not
+    // ANTIGRAVITY_CONVERSATION_ID/ANTIGRAVITY_TOOL_NAME env vars, which
+    // Antigravity never sets.
+    const toolInput = JSON.stringify({ conversationId: sessionId, toolCall: { name: "run_command" } });
+    const stopInput = JSON.stringify({ conversationId: sessionId });
 
-    execSync(`bash ${path.join(antigravityAdaptersDir, "pre-tool.sh")}`, { env });
-    execSync(`bash ${path.join(antigravityAdaptersDir, "post-tool.sh")}`, { env });
+    const preOut = execSync(`bash ${path.join(antigravityAdaptersDir, "pre-tool.sh")}`, { input: toolInput }).toString();
+    const postOut = execSync(`bash ${path.join(antigravityAdaptersDir, "post-tool.sh")}`, { input: toolInput }).toString();
+    const stopOut = execSync(`bash ${path.join(antigravityAdaptersDir, "stop.sh")}`, { input: stopInput }).toString();
+
+    // stdout must be the documented decision JSON, since Antigravity acts on it
+    expect(JSON.parse(preOut)).toEqual({ decision: "allow" });
+    expect(JSON.parse(postOut)).toEqual({});
+    expect(JSON.parse(stopOut)).toEqual({ decision: "continue" });
 
     expect(fs.existsSync(targetFile)).toBe(true);
 
     const writer = new UnifiedEventWriter({ logDir });
     const events = writer.readEvents(sessionId);
 
-    expect(events.length).toBe(2);
+    expect(events.length).toBe(3);
     expect(events.every(isValidUnifiedEvent)).toBe(true);
     expect(events[0].tool).toBe("antigravity");
     expect(events[0].event).toBe("tool.before");
     expect(events[1].event).toBe("tool.after");
+    expect(events[2].event).toBe("session.end");
   });
 });
