@@ -1,0 +1,51 @@
+{
+  "description": "agent-events plugin hooks: emit UnifiedEvent NDJSON lines to ~/.claude/state/agent-events/<sessionId>.ndjson for Claude Code session/tool lifecycle, via the adapters/claude-code/*.sh scripts. Observational only (always exit 0, never blocks).",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/adapters/claude-code/session-start.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/adapters/claude-code/pre-tool.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/adapters/claude-code/post-tool.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/adapters/claude-code/stop.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "agent-events",
+  "owner": {
+    "name": "DrumRobot",
+    "email": "drumrobot43@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "agent-events",
+      "description": "Emit unified agent lifecycle events (session/tool start-stop) as NDJSON via @es6kr/agent-events adapters, bridging Claude Code hooks and other agent runtimes into one observability stream.",
+      "version": "0.1.0",
+      "source": "./"
+    }
+  ]
+}
