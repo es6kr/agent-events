@@ -2,13 +2,13 @@
   "agent-events": {
     "enabled": true,
     "PreToolUse": [
-      { "matcher": ".*", "command": "bash ./adapters/antigravity/pre-tool.sh", "timeout": 5 }
+      { "matcher": ".*", "command": "bash \"$HOME/.gemini/config/plugins/agent-events/adapters/antigravity/pre-tool.sh\"", "timeout": 5 }
     ],
     "PostToolUse": [
-      { "matcher": ".*", "command": "bash ./adapters/antigravity/post-tool.sh", "timeout": 5 }
+      { "matcher": ".*", "command": "bash \"$HOME/.gemini/config/plugins/agent-events/adapters/antigravity/post-tool.sh\"", "timeout": 5 }
     ],
     "Stop": [
-      { "command": "bash ./adapters/antigravity/stop.sh", "timeout": 5 }
+      { "command": "bash \"$HOME/.gemini/config/plugins/agent-events/adapters/antigravity/stop.sh\"", "timeout": 5 }
     ]
   }
 }
