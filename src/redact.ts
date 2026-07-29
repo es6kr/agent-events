@@ -11,7 +11,7 @@ export interface RedactedText {
 
 /**
  * Redact a raw text string into a hash/length pair. NDJSON event files live
- * under ~/.claude/state/agent-events/ (world-readable) — raw prompt/message
+ * under ~/.local/state/agent-events/ (world-readable) — raw prompt/message
  * text must never be written there verbatim.
  */
 export function redactText(text: string): RedactedText {

@@ -7,7 +7,7 @@ import { isValidUnifiedEvent } from "../src/schema";
 
 describe("@es6kr/agent-events Shell Adapters Test Suite", () => {
   const sessionId = "test-shell-adapters-session";
-  const logDir = path.join(os.homedir(), ".claude", "state", "agent-events");
+  const logDir = path.join(os.homedir(), ".local", "state", "agent-events");
   const targetFile = path.join(logDir, `${sessionId}.ndjson`);
 
   const claudeAdaptersDir = path.join(__dirname, "../adapters/claude-code");

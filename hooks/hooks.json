@@ -1,5 +1,5 @@
 {
-  "description": "agent-events plugin hooks: emit UnifiedEvent NDJSON lines to ~/.claude/state/agent-events/<sessionId>.ndjson for Claude Code session/tool lifecycle, via the adapters/claude-code/*.sh scripts. Observational only (always exit 0, never blocks).",
+  "description": "agent-events plugin hooks: emit UnifiedEvent NDJSON lines to ~/.local/state/agent-events/<sessionId>.ndjson for Claude Code session/tool lifecycle, via the adapters/claude-code/*.sh scripts. Observational only (always exit 0, never blocks).",
   "hooks": {
     "SessionStart": [
       {

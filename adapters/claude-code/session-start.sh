@@ -4,10 +4,11 @@
 set -euo pipefail
 
 INPUT="${CLAUDE_TOOL_INPUT:-$(cat)}"
-SESSION_ID=$(printf '%s' "$INPUT" | jq -r '.session_id // "default-session"' 2>/dev/null)
+SESSION_ID=$(printf '%s' "$INPUT" | jq -r '.session_id // empty' 2>/dev/null)
+SESSION_ID="${SESSION_ID:-default-session}"
 CWD=$(printf '%s' "$INPUT" | jq -r '.cwd // env.PWD // ""' 2>/dev/null)
 
-LOG_DIR="${HOME}/.claude/state/agent-events"
+LOG_DIR="${HOME}/.local/state/agent-events"
 mkdir -p "$LOG_DIR"
 TARGET_FILE="${LOG_DIR}/${SESSION_ID}.ndjson"
 

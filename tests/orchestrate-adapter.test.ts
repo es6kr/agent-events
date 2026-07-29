@@ -6,7 +6,7 @@ import { UnifiedEventWriter } from "../src/writer";
 
 describe("orchestrate-adapter.sh Stdio Pipe Integration Test", () => {
   const sessionId = "test-pipe-session-999";
-  const logDir = path.join(os.homedir(), ".claude", "state", "agent-events");
+  const logDir = path.join(os.homedir(), ".local", "state", "agent-events");
   const targetFile = path.join(logDir, `${sessionId}.ndjson`);
   const scriptPath = path.join(__dirname, "../adapters/claw-orchestrator/orchestrate-adapter.sh");
 

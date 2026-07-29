@@ -1,11 +1,11 @@
 ---
 name: agent-events
-description: Explain, verify, or troubleshoot the @es6kr/agent-events plugin — the unified agent lifecycle event schema and NDJSON writer bridging Claude Code, Antigravity, OpenClaw, and claw-orchestrator hooks. Use when asked about UnifiedEvent, agent-events hooks, session/tool NDJSON logs under ~/.claude/state/agent-events/, or why a lifecycle event did or didn't get recorded.
+description: Explain, verify, or troubleshoot the @es6kr/agent-events plugin — the unified agent lifecycle event schema and NDJSON writer bridging Claude Code, Antigravity, OpenClaw, and claw-orchestrator hooks. Use when asked about UnifiedEvent, agent-events hooks, session/tool NDJSON logs under ~/.local/state/agent-events/, or why a lifecycle event did or didn't get recorded.
 ---
 
 # agent-events
 
-Vendor-agnostic agent lifecycle event schema (`UnifiedEvent`) and NDJSON stream writer. This plugin wires the package's Claude Code adapters into real hooks so `session.start` / `tool.before` / `tool.after` / `session.end` events land in `~/.claude/state/agent-events/<sessionId>.ndjson` for every session, tool call, and stop.
+Vendor-agnostic agent lifecycle event schema (`UnifiedEvent`) and NDJSON stream writer. This plugin wires the package's Claude Code adapters into real hooks so `session.start` / `tool.before` / `tool.after` / `session.end` events land in `~/.local/state/agent-events/<sessionId>.ndjson` for every session, tool call, and stop.
 
 ## What the hooks do
 
@@ -28,7 +28,7 @@ Antigravity and `claw-orchestrator` adapters (`adapters/antigravity/`, `adapters
 
 # 2. Trigger a real session + tool call, then inspect the NDJSON stream
 SESSION_ID=<current-session-id>
-cat "$HOME/.claude/state/agent-events/${SESSION_ID}.ndjson" | tail -5
+cat "$HOME/.local/state/agent-events/${SESSION_ID}.ndjson" | tail -5
 ```
 
 Expect to see `session.start` near the top, `tool.before`/`tool.after` pairs for each tool call, and `session.end` after a `Stop`.

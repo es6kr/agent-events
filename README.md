@@ -30,7 +30,7 @@ const event: UnifiedEvent = {
   }
 };
 
-// Emits event line atomically to ~/.claude/state/agent-events/session-abc-123.ndjson
+// Emits event line atomically to ~/.local/state/agent-events/session-abc-123.ndjson
 writer.emit(event);
 ```
 
@@ -58,5 +58,10 @@ npm test         # Run Jest unit test suite
 - `antigravity`: Gemini pair-programming subagents and background tasks
 - `openclaw`: OpenClaw headless CLI sessions (`acpx`)
 - `claw-orchestrator`: Enderfga/openclaw-claude-code orchestrator stdio ACP streams
+- `orca`: Stably AI Orca (Agent Development Environment) parallel CLI agent streams
 
-`opencode` was previously declared here without an adapter ever being built. Removed until an adapter actually exists — add it back alongside the adapter, not before.
+## Architecture & Governance
+
+- **Core Event Standard**: `@es6kr/agent-events` serves as the canonical vendor-agnostic event schema and telemetry layer. All documentation, commits, and API contracts within this repository are written in **English**.
+- **Extensibility**: Custom enterprise adapters, private authentication wrappers, or internal pipeline bindings can extend or consume this package as a standard npm dependency in external repositories.
+

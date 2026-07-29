@@ -13,7 +13,7 @@ export interface EventWriterOptions {
  * Default directory for event log streams
  */
 export function getDefaultLogDir(): string {
-  return path.join(os.homedir(), ".claude", "state", "agent-events");
+  return path.join(os.homedir(), ".local", "state", "agent-events");
 }
 
 /**

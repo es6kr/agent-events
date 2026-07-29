@@ -9,7 +9,7 @@ This guide explains how external consumer applications (monitoring dashboards, n
 All event adapters write to session NDJSON log files under:
 
 ```text
-~/.claude/state/agent-events/<sessionId>.ndjson
+~/.local/state/agent-events/<sessionId>.ndjson
 ```
 
 - Each line is a self-contained JSON object validating against `UnifiedEventSchema` (v=1).
@@ -36,10 +36,10 @@ for (const event of events) {
 
 ```bash
 # Watch live telemetry stream for a session
-tail -f ~/.claude/state/agent-events/session-123.ndjson | jq '.'
+tail -f ~/.local/state/agent-events/session-123.ndjson | jq '.'
 
 # Filter only tool.before and tool.after events across all sessions
-tail -f ~/.claude/state/agent-events/*.ndjson | jq 'select(.event == "tool.before" or .event == "tool.after")'
+tail -f ~/.local/state/agent-events/*.ndjson | jq 'select(.event == "tool.before" or .event == "tool.after")'
 ```
 
 ### 3. Notification Triggering (Mac / Desktop Notifications)
