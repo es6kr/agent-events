@@ -17,7 +17,7 @@ describe("orchestrate-adapter.sh Stdio Pipe Integration Test", () => {
   });
 
   test("converts stdio JSON-RPC stdin input to NDJSON file stream", (done) => {
-    const child = spawn(scriptPath, [sessionId], {
+    const child = spawn("bash", [scriptPath, sessionId], {
       env: { ...process.env, NODE_BIN: "node" }
     });
 

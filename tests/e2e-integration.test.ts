@@ -50,7 +50,8 @@ describe("@es6kr/agent-events Multi-Runtime E2E Integration", () => {
         jsonrpc: "2.0",
         method: "permission/request",
         params: { toolName: "run_command", args: { command: "pnpm test" } }
-      })
+      }),
+      "2026-07-22T13:00:10.000Z"
     );
 
     // 4. Emulate Claude Code session.end

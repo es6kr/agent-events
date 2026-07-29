@@ -23,7 +23,7 @@ export class ClawOrchestratorACPTranslator {
   /**
    * Process a single line of stdio JSON-RPC output from acpx / claw-orchestrator
    */
-  public parseAndEmitLine(rawLine: string): UnifiedEvent | null {
+  public parseAndEmitLine(rawLine: string, overrideTs?: string): UnifiedEvent | null {
     const line = rawLine.trim();
     if (!line || !line.startsWith("{")) {
       return null;
@@ -31,7 +31,7 @@ export class ClawOrchestratorACPTranslator {
 
     try {
       const msg: ACPMessage = JSON.parse(line);
-      return this.translateMessage(msg);
+      return this.translateMessage(msg, overrideTs);
     } catch (e) {
       return null;
     }
@@ -40,12 +40,12 @@ export class ClawOrchestratorACPTranslator {
   /**
    * Map ACP stdio message to UnifiedEvent
    */
-  public translateMessage(msg: ACPMessage): UnifiedEvent | null {
+  public translateMessage(msg: ACPMessage, overrideTs?: string): UnifiedEvent | null {
     if (!msg.method) {
       return null;
     }
 
-    const ts = new Date().toISOString();
+    const ts = overrideTs || new Date().toISOString();
     let eventType: UnifiedEventType | null = null;
     let data: Record<string, unknown> = {};
 
