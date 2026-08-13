@@ -11,9 +11,10 @@ INPUT="$(cat)"
 SESSION_ID=$(printf '%s' "$INPUT" | jq -r '.conversationId // empty' 2>/dev/null)
 SESSION_ID="${SESSION_ID:-antigravity-session}"
 
-LOG_DIR="${HOME}/.local/state/agent-events"
+LOG_DIR="${LOG_DIR:-${HOME}/.local/state/agent-events}"
 mkdir -p "$LOG_DIR"
 TARGET_FILE="${LOG_DIR}/${SESSION_ID}.ndjson"
+
 
 TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
