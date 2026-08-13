@@ -17,9 +17,25 @@ describe("orchestrate-adapter.sh Stdio Pipe Integration Test", () => {
   });
 
   test("converts stdio JSON-RPC stdin input to NDJSON file stream", (done) => {
-    const child = spawn("bash", [scriptPath, sessionId], {
-      env: { ...process.env, NODE_BIN: "node" }
+    const toPosixPath = (p: string) => {
+      let posix = p.replace(/\\/g, "/");
+      if (/^[a-zA-Z]:/.test(posix)) {
+        posix = "/mnt/" + posix[0].toLowerCase() + posix.substring(2);
+      }
+      return posix;
+    };
+
+    const nodeDirPosix = path.dirname(process.execPath).replace(/\\/g, "/");
+    const child = spawn("bash", [toPosixPath(scriptPath), sessionId], {
+      env: {
+        ...process.env,
+        NODE_BIN: process.execPath.replace(/\\/g, "/"),
+        HOME: os.homedir().replace(/\\/g, "/"),
+        PATH: `${nodeDirPosix}:${process.env.PATH}`
+      }
     });
+
+
 
     const acpMessages = [
       JSON.stringify({ jsonrpc: "2.0", method: "session/new", params: { client: "acpx" } }) + "\n",
