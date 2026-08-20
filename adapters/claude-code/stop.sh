@@ -21,7 +21,7 @@ mapfile -t _FIELDS <<< "${_JQ_OUT//$'\r'/}"
 SESSION_ID="${_FIELDS[0]:-default-session}"
 EVENT_LINE="${_FIELDS[1]:-}"
 
-LOG_DIR="${HOME}/.local/state/agent-events"
+LOG_DIR="${LOG_DIR:-${HOME}/.local/state/agent-events}"
 [ -d "$LOG_DIR" ] || mkdir -p "$LOG_DIR"
 TARGET_FILE="${LOG_DIR}/${SESSION_ID}.ndjson"
 

@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
 import { UnifiedEventWriter } from "../src/writer";
+import { toPosixPath } from "./helpers/posix-path";
 
 describe("orchestrate-adapter.sh Stdio Pipe Integration Test", () => {
   const sessionId = "test-pipe-session-999";
@@ -17,14 +18,6 @@ describe("orchestrate-adapter.sh Stdio Pipe Integration Test", () => {
   });
 
   test("converts stdio JSON-RPC stdin input to NDJSON file stream", (done) => {
-    const toPosixPath = (p: string) => {
-      let posix = p.replace(/\\/g, "/");
-      if (/^[a-zA-Z]:/.test(posix)) {
-        posix = "/mnt/" + posix[0].toLowerCase() + posix.substring(2);
-      }
-      return posix;
-    };
-
     const nodeDirPosix = path.dirname(process.execPath).replace(/\\/g, "/");
     const child = spawn("bash", [toPosixPath(scriptPath), sessionId], {
       env: {

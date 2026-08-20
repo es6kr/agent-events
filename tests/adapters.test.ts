@@ -4,6 +4,7 @@ import * as path from "path";
 import * as os from "os";
 import { UnifiedEventWriter } from "../src/writer";
 import { isValidUnifiedEvent } from "../src/schema";
+import { toPosixPath } from "./helpers/posix-path";
 
 describe("@es6kr/agent-events Shell Adapters Test Suite", () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agent-events-test-"));
@@ -31,17 +32,9 @@ describe("@es6kr/agent-events Shell Adapters Test Suite", () => {
     // Real Claude Code hooks pass session_id/tool_name via a JSON payload on
     // stdin (or CLAUDE_TOOL_INPUT env var) — not CLAUDE_SESSION_ID/CLAUDE_TOOL_NAME
     // env vars, which Claude Code never sets.
-    const toPosixPath = (p: string) => {
-      let posix = p.replace(/\\/g, "/");
-      if (/^[a-zA-Z]:/.test(posix)) {
-        posix = "/mnt/" + posix[0].toLowerCase() + posix.substring(2);
-      }
-      return posix;
-    };
-
-
     const env: Record<string, string | undefined> = {
       ...process.env,
+      LOG_DIR: logDir,
       HOME: os.homedir().replace(/\\/g, "/"),
       PATH: `${path.dirname(process.execPath).replace(/\\/g, "/")}:${process.env.PATH}`
     };
@@ -80,17 +73,9 @@ describe("@es6kr/agent-events Shell Adapters Test Suite", () => {
     const toolInput = JSON.stringify({ conversationId: sessionId, toolCall: { name: "run_command" } });
     const stopInput = JSON.stringify({ conversationId: sessionId });
 
-    const toPosixPath = (p: string) => {
-      let posix = p.replace(/\\/g, "/");
-      if (/^[a-zA-Z]:/.test(posix)) {
-        posix = "/mnt/" + posix[0].toLowerCase() + posix.substring(2);
-      }
-      return posix;
-    };
-
-
     const env = {
       ...process.env,
+      LOG_DIR: logDir,
       HOME: os.homedir().replace(/\\/g, "/"),
       PATH: `${path.dirname(process.execPath).replace(/\\/g, "/")}:${process.env.PATH}`
     };
