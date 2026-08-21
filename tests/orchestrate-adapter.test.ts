@@ -7,9 +7,15 @@ import { toPosixPath } from "./helpers/posix-path";
 
 describe("orchestrate-adapter.sh Stdio Pipe Integration Test", () => {
   const sessionId = "test-pipe-session-999";
-  const logDir = path.join(os.homedir(), ".local", "state", "agent-events");
+  const logDir = fs.mkdtempSync(path.join(os.tmpdir(), "agent-events-orchestrator-test-"));
   const targetFile = path.join(logDir, `${sessionId}.ndjson`);
   const scriptPath = path.join(__dirname, "../adapters/claw-orchestrator/orchestrate-adapter.sh");
+
+  afterAll(() => {
+    if (fs.existsSync(logDir)) {
+      fs.rmSync(logDir, { recursive: true, force: true });
+    }
+  });
 
   afterEach(() => {
     if (fs.existsSync(targetFile)) {
@@ -22,6 +28,10 @@ describe("orchestrate-adapter.sh Stdio Pipe Integration Test", () => {
     const child = spawn("bash", [toPosixPath(scriptPath), sessionId], {
       env: {
         ...process.env,
+        // LOG_DIR is read by the Node CLI (process.env.LOG_DIR), not by bash,
+        // so it needs a native path Node's fs can resolve — not the
+        // bash-mount POSIX form toPosixPath() produces for the script path.
+        LOG_DIR: logDir,
         NODE_BIN: process.execPath.replace(/\\/g, "/"),
         HOME: os.homedir().replace(/\\/g, "/"),
         PATH: `${nodeDirPosix}:${process.env.PATH}`
