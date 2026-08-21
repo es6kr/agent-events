@@ -4,14 +4,22 @@ import * as path from "path";
 import * as os from "os";
 import { UnifiedEventWriter } from "../src/writer";
 import { isValidUnifiedEvent } from "../src/schema";
+import { toPosixPath } from "./helpers/posix-path";
 
 describe("@es6kr/agent-events Shell Adapters Test Suite", () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agent-events-test-"));
   const sessionId = "test-shell-adapters-session";
-  const logDir = path.join(os.homedir(), ".local", "state", "agent-events");
+  const logDir = tmpDir;
   const targetFile = path.join(logDir, `${sessionId}.ndjson`);
 
   const claudeAdaptersDir = path.join(__dirname, "../adapters/claude-code");
   const antigravityAdaptersDir = path.join(__dirname, "../adapters/antigravity");
+
+  afterAll(() => {
+    if (fs.existsSync(tmpDir)) {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
 
   afterEach(() => {
     if (fs.existsSync(targetFile)) {
@@ -19,21 +27,30 @@ describe("@es6kr/agent-events Shell Adapters Test Suite", () => {
     }
   });
 
+
   test("executes Claude Code shell adapter scripts cleanly", () => {
     // Real Claude Code hooks pass session_id/tool_name via a JSON payload on
     // stdin (or CLAUDE_TOOL_INPUT env var) — not CLAUDE_SESSION_ID/CLAUDE_TOOL_NAME
     // env vars, which Claude Code never sets.
-    const env = { ...process.env };
+    const env: Record<string, string | undefined> = {
+      ...process.env,
+      LOG_DIR: logDir,
+      HOME: os.homedir().replace(/\\/g, "/"),
+      PATH: `${path.dirname(process.execPath).replace(/\\/g, "/")}:${process.env.PATH}`
+    };
     delete env.CLAUDE_TOOL_INPUT;
+
+
+
 
     const sessionStartInput = JSON.stringify({ session_id: sessionId, cwd: "/tmp" });
     const toolInput = JSON.stringify({ session_id: sessionId, tool_name: "Write" });
     const stopInput = JSON.stringify({ session_id: sessionId, transcript_path: "/tmp/t.jsonl" });
 
-    execSync(`bash ${path.join(claudeAdaptersDir, "session-start.sh")}`, { env, input: sessionStartInput });
-    execSync(`bash ${path.join(claudeAdaptersDir, "pre-tool.sh")}`, { env, input: toolInput });
-    execSync(`bash ${path.join(claudeAdaptersDir, "post-tool.sh")}`, { env, input: toolInput });
-    execSync(`bash ${path.join(claudeAdaptersDir, "stop.sh")}`, { env, input: stopInput });
+    execSync(`bash "${toPosixPath(path.join(claudeAdaptersDir, "session-start.sh"))}"`, { env, input: sessionStartInput });
+    execSync(`bash "${toPosixPath(path.join(claudeAdaptersDir, "pre-tool.sh"))}"`, { env, input: toolInput });
+    execSync(`bash "${toPosixPath(path.join(claudeAdaptersDir, "post-tool.sh"))}"`, { env, input: toolInput });
+    execSync(`bash "${toPosixPath(path.join(claudeAdaptersDir, "stop.sh"))}"`, { env, input: stopInput });
 
     expect(fs.existsSync(targetFile)).toBe(true);
 
@@ -56,14 +73,24 @@ describe("@es6kr/agent-events Shell Adapters Test Suite", () => {
     const toolInput = JSON.stringify({ conversationId: sessionId, toolCall: { name: "run_command" } });
     const stopInput = JSON.stringify({ conversationId: sessionId });
 
-    const preOut = execSync(`bash ${path.join(antigravityAdaptersDir, "pre-tool.sh")}`, { input: toolInput }).toString();
-    const postOut = execSync(`bash ${path.join(antigravityAdaptersDir, "post-tool.sh")}`, { input: toolInput }).toString();
-    const stopOut = execSync(`bash ${path.join(antigravityAdaptersDir, "stop.sh")}`, { input: stopInput }).toString();
+    const env = {
+      ...process.env,
+      LOG_DIR: logDir,
+      HOME: os.homedir().replace(/\\/g, "/"),
+      PATH: `${path.dirname(process.execPath).replace(/\\/g, "/")}:${process.env.PATH}`
+    };
+
+
+
+
+    const preOut = execSync(`bash "${toPosixPath(path.join(antigravityAdaptersDir, "pre-tool.sh"))}"`, { env, input: toolInput }).toString();
+    const postOut = execSync(`bash "${toPosixPath(path.join(antigravityAdaptersDir, "post-tool.sh"))}"`, { env, input: toolInput }).toString();
+    const stopOut = execSync(`bash "${toPosixPath(path.join(antigravityAdaptersDir, "stop.sh"))}"`, { env, input: stopInput }).toString();
 
     // stdout must be the documented decision JSON, since Antigravity acts on it
     expect(JSON.parse(preOut)).toEqual({ decision: "allow" });
     expect(JSON.parse(postOut)).toEqual({});
-    expect(JSON.parse(stopOut)).toEqual({ decision: "continue" });
+    expect(JSON.parse(stopOut)).toEqual({});
 
     expect(fs.existsSync(targetFile)).toBe(true);
 

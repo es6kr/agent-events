@@ -59,6 +59,10 @@ npm test         # Run Jest unit test suite
 - `openclaw`: OpenClaw headless CLI sessions (`acpx`)
 - `claw-orchestrator`: Enderfga/openclaw-claude-code orchestrator stdio ACP streams
 
+## Shell Adapter Requirements
+
+The `adapters/claude-code/*.sh` scripts use the `printf '%(...)T'` builtin (Bash 4.2+) to format timestamps without spawning `date`. This is satisfied by the default `/bin/bash` on Linux and Windows (Git-Bash/WSL/Cygwin), but **not** by macOS's default system Bash (3.2, frozen for licensing reasons) — install a newer Bash (e.g. via Homebrew: `brew install bash`) and point the hook runner at it if invoking these adapters on macOS with the system shell.
+
 ## Architecture & Governance
 
 - **Core Event Standard**: `@es6kr/agent-events` serves as the canonical vendor-agnostic event schema and telemetry layer. All documentation, commits, and API contracts within this repository are written in **English**.

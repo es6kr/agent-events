@@ -3,12 +3,19 @@ import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
 import { UnifiedEventWriter } from "../src/writer";
+import { toPosixPath } from "./helpers/posix-path";
 
 describe("orchestrate-adapter.sh Stdio Pipe Integration Test", () => {
   const sessionId = "test-pipe-session-999";
-  const logDir = path.join(os.homedir(), ".local", "state", "agent-events");
+  const logDir = fs.mkdtempSync(path.join(os.tmpdir(), "agent-events-orchestrator-test-"));
   const targetFile = path.join(logDir, `${sessionId}.ndjson`);
   const scriptPath = path.join(__dirname, "../adapters/claw-orchestrator/orchestrate-adapter.sh");
+
+  afterAll(() => {
+    if (fs.existsSync(logDir)) {
+      fs.rmSync(logDir, { recursive: true, force: true });
+    }
+  });
 
   afterEach(() => {
     if (fs.existsSync(targetFile)) {
@@ -17,9 +24,21 @@ describe("orchestrate-adapter.sh Stdio Pipe Integration Test", () => {
   });
 
   test("converts stdio JSON-RPC stdin input to NDJSON file stream", (done) => {
-    const child = spawn("bash", [scriptPath, sessionId], {
-      env: { ...process.env, NODE_BIN: "node" }
+    const nodeDirPosix = path.dirname(process.execPath).replace(/\\/g, "/");
+    const child = spawn("bash", [toPosixPath(scriptPath), sessionId], {
+      env: {
+        ...process.env,
+        // LOG_DIR is read by the Node CLI (process.env.LOG_DIR), not by bash,
+        // so it needs a native path Node's fs can resolve — not the
+        // bash-mount POSIX form toPosixPath() produces for the script path.
+        LOG_DIR: logDir,
+        NODE_BIN: process.execPath.replace(/\\/g, "/"),
+        HOME: os.homedir().replace(/\\/g, "/"),
+        PATH: `${nodeDirPosix}:${process.env.PATH}`
+      }
     });
+
+
 
     const acpMessages = [
       JSON.stringify({ jsonrpc: "2.0", method: "session/new", params: { client: "acpx" } }) + "\n",
