@@ -66,6 +66,28 @@ test("separates case-only session identities without normalizing the event", () 
   expect(fs.readdirSync(base).sort()).toEqual([hash("SessionA"), hash("sessiona")].sort());
 });
 
+test("rejects dot traversal aliases instead of creating incidental directories", () => {
+  const v = input();
+  v.binding.output_dir = base + path.sep + "incidental" + path.sep + ".." + path.sep + hash(v.binding.session_id);
+  const result = run(JSON.stringify(v)); expect(result.status).toBe(1);
+  expect(result.stdout).toBe(""); expect(fs.readdirSync(base)).toEqual([]);
+});
+
+test("refuses an existing output-directory junction", () => {
+  const v = input(), other = path.join(base, "other"); fs.mkdirSync(other);
+  fs.symlinkSync(other, v.binding.output_dir, "junction");
+  const result = run(JSON.stringify(v)); expect(result.status).toBe(1);
+  expect(result.stdout).toBe(""); expect(fs.readdirSync(other)).toEqual([]);
+});
+
+test("refuses an existing hard-linked output file before append", () => {
+  const v = input(), original = path.join(base, "original.ndjson");
+  fs.mkdirSync(v.binding.output_dir); fs.writeFileSync(original, "PRESERVE\n");
+  fs.linkSync(original, path.join(v.binding.output_dir, v.binding.session_id + ".ndjson"));
+  const result = run(JSON.stringify(v)); expect(result.status).toBe(1);
+  expect(result.stdout).toBe(""); expect(fs.readFileSync(original, "utf8")).toBe("PRESERVE\n");
+});
+
 test("pure index import has no CLI/stdin/output-directory side effects", () => {
   const result = spawnSync(process.execPath, ["-e", "require(process.argv[1]);console.log('IMPORT_ONLY')", path.join(__dirname, "../dist/index.js")],
     {encoding: "utf8", env: {...process.env, HOME: base, USERPROFILE: base}, timeout: 5000});
