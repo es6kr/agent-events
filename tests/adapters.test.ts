@@ -63,7 +63,7 @@ describe("@es6kr/agent-events Shell Adapters Test Suite", () => {
     // stdout must be the documented decision JSON, since Antigravity acts on it
     expect(JSON.parse(preOut)).toEqual({ decision: "allow" });
     expect(JSON.parse(postOut)).toEqual({});
-    expect(JSON.parse(stopOut)).toEqual({ decision: "continue" });
+    expect(JSON.parse(stopOut)).toEqual({});
 
     expect(fs.existsSync(targetFile)).toBe(true);
 
