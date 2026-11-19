@@ -1,0 +1,28 @@
+name: Knowledge trace contracts
+on:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  knowledge-trace:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run build -- --newLine lf
+      - name: Verify actual generated mapper
+        run: |
+          node - <<'NODE'
+          const fs = require('fs'), assert = require('assert/strict'), crypto = require('crypto');
+          const actual = fs.readFileSync('dist/adapters/knowledge/trace.js');
+          assert.deepEqual(actual, fs.readFileSync('tests/fixtures/knowledge-trace-request-home.js'));
+          assert.equal(crypto.createHash('sha256').update(actual).digest('hex'), '3571222cf3b76c027eeb506127a8b95f2f5ed706b8dd5bf0291c7b8844ba15b9');
+          NODE
+      - run: npm test -- --runInBand
